@@ -1,0 +1,17 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Notebook cruft
+.ipynb_checkpoints/
+
+# Reader-supplied inputs / generated outputs
+wave.mp4
+raster_and_alarm.png
