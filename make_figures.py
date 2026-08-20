@@ -83,7 +83,7 @@ axes[1].bar(centers, int_hist, width=BIN_S, color="C0", align="center")
 axes[1].set_ylabel("spikes per 100 ms")
 axes[1].set_xlabel("time (s)")
 axes[1].set_title("What the network said")
-fig.suptitle(f"Input events vs. output spikes  —  r = {r:.2f}", y=1.02)
+fig.suptitle(f"Input events vs. output spikes (r = {r:.2f})", y=1.02)
 plt.tight_layout()
 for ext in ("png", "pdf"):
     plt.savefig(f"sensor_vs_integrator.{ext}", dpi=160, bbox_inches="tight")
