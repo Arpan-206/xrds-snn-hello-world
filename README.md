@@ -48,7 +48,7 @@ The derived clip is likewise CC BY-SA 4.0.
 - matplotlib, numpy, opencv, jupyter
 
 `eventify-dvs` is a deliberately small stand-in for heavier DVS
-simulators. Anything that yields `(x, y, t, p)` events can replace it —
+simulators. Anything that yields `(x, y, t, p)` events can replace it:
 [v2e](https://github.com/SensorsINI/v2e),
 [ESIM](https://github.com/uzh-rpg/rpg_esim), or a real event camera via
 `dv-processing` / `metavision-sdk`. Only Step 1 of the notebook changes;
