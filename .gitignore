@@ -14,3 +14,6 @@ wheels/
 
 # Scratch test clips (the bundled sample clip wave.mp4 IS tracked)
 clips/
+
+# Local scratch notebooks
+Untitled*.ipynb
