@@ -132,4 +132,74 @@ for ext in ("png", "pdf"):
     plt.savefig(f"architecture.{ext}", dpi=160, bbox_inches="tight")
 plt.close(fig)
 
-print("wrote sensor_vs_integrator.{png,pdf} and architecture.{png,pdf}")
+
+# --- Figure: how one spiking neuron decides (idealized explainer) ------------
+# Hand-picked input times demonstrate both regimes: spread-out spikes leak
+# away; a tight burst crosses the threshold and fires the neuron.
+in_spikes = [0.07, 0.19, 0.32, 0.57, 0.585, 0.60, 0.615, 0.88]
+REST, TH, JUMP, TAU, DT = 0.0, 1.0, 0.40, 0.05, 0.001
+
+tt = np.arange(0, 1.0, DT)
+v = np.zeros_like(tt)
+fires = []
+vi = REST
+spk = iter(sorted(in_spikes))
+nxt = next(spk, None)
+for i, ti in enumerate(tt):
+    vi += -(vi - REST) / TAU * DT
+    while nxt is not None and nxt <= ti:
+        vi += JUMP
+        nxt = next(spk, None)
+    if vi >= TH:
+        fires.append(ti)
+        v[i] = TH
+        vi = REST
+    else:
+        v[i] = vi
+
+fig, ax = plt.subplots(figsize=(9, 3.4))
+ax.set_xlim(0, 1.0)
+ax.set_ylim(-0.28, 2.05)
+ax.axis("off")
+
+# Input spike row.
+ax.text(-0.015, 1.45, "input\nspikes", ha="right", va="center", fontsize=9)
+for s in in_spikes:
+    ax.plot([s, s], [1.32, 1.58], color="0.3", lw=2)
+
+# Membrane potential, threshold, rest.
+ax.plot(tt, v, color="0.15", lw=1.6)
+ax.axhline(TH, ls="--", color="C3", lw=1, xmax=0.97)
+ax.axhline(REST, ls=":", color="0.55", lw=1, xmax=0.97)
+ax.text(1.0, TH, "threshold", ha="left", va="center", fontsize=8, color="C3")
+ax.text(1.0, REST, "rest", ha="left", va="center", fontsize=8, color="0.55")
+ax.text(-0.015, 0.5, "membrane\npotential $v$", ha="right", va="center",
+        fontsize=9)
+
+# Output spike row.
+ax.text(-0.015, 1.86, "output", ha="right", va="center", fontsize=9,
+        color="C0")
+for f in fires:
+    ax.plot([f, f], [1.74, 2.0], color="C0", lw=2.5)
+
+# Annotations for the two regimes.
+ax.annotate("too far apart:\nthe leak wins", xy=(0.26, 0.30),
+            xytext=(0.16, 0.78), fontsize=8.5, ha="center", color="0.3",
+            arrowprops=dict(arrowstyle="->", color="0.5", lw=1))
+ax.annotate("close together:\nthey pile up", xy=(0.605, 0.82),
+            xytext=(0.48, 1.05), fontsize=8.5, ha="center", color="0.3",
+            arrowprops=dict(arrowstyle="->", color="0.5", lw=1))
+if fires:
+    ax.annotate("fires once,\nthen resets", xy=(fires[0] + 0.004, 0.35),
+                xytext=(0.8, 0.75), fontsize=8.5, ha="center", color="C0",
+                arrowprops=dict(arrowstyle="->", color="C0", lw=1))
+ax.annotate("", xy=(0.35, -0.2), xytext=(0.05, -0.2),
+            arrowprops=dict(arrowstyle="->", color="0.4", lw=1))
+ax.text(0.2, -0.13, "time", ha="center", fontsize=8, color="0.4")
+
+plt.tight_layout()
+for ext in ("png", "pdf"):
+    plt.savefig(f"neuron_schematic.{ext}", dpi=160, bbox_inches="tight")
+plt.close(fig)
+
+print("wrote sensor_vs_integrator, architecture, and neuron_schematic figures")
