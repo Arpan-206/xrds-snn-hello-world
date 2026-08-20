@@ -77,13 +77,13 @@ print(json.dumps(stats, indent=2))
 # --- Figure 2: sensor rate vs integrator rate --------------------------------
 fig, axes = plt.subplots(2, 1, figsize=(9, 4), sharex=True)
 axes[0].bar(centers, event_hist, width=BIN_S, color="0.3", align="center")
-axes[0].set_ylabel("events / 100 ms")
-axes[0].set_title("What the sensor sees")
+axes[0].set_ylabel("events per 100 ms")
+axes[0].set_title("What the camera saw")
 axes[1].bar(centers, int_hist, width=BIN_S, color="C0", align="center")
-axes[1].set_ylabel("integrator spikes / 100 ms")
+axes[1].set_ylabel("spikes per 100 ms")
 axes[1].set_xlabel("time (s)")
-axes[1].set_title("What the SNN emits")
-fig.suptitle(f"Sensor rate vs. integrator rate  —  r = {r:.2f}", y=1.02)
+axes[1].set_title("What the network said")
+fig.suptitle(f"Input events vs. output spikes  —  r = {r:.2f}", y=1.02)
 plt.tight_layout()
 for ext in ("png", "pdf"):
     plt.savefig(f"sensor_vs_integrator.{ext}", dpi=160, bbox_inches="tight")
@@ -116,14 +116,15 @@ axes[2].scatter(np.asarray(M.t / second), np.asarray(M.i), s=30, c="C0",
                 marker="|", linewidths=1.2)
 axes[2].set_ylim(-0.5, 7.5)
 axes[2].set_yticks(range(8))
+axes[2].set_ylabel("neuron")
 axes[2].set_xlabel("time (s)")
-axes[2].set_title("integrator spikes\n(8 LIF neurons)")
+axes[2].set_title("output spikes\n(8 neurons)")
 for ax in axes[:2]:
     ax.set_xticks([])
     ax.set_yticks([])
 p0, p1, p2 = (ax.get_position() for ax in axes)
-for a, b, label in ((p0, p1, "eventify-dvs\nlog-ΔI > θ"),
-                    (p1, p2, "16,384 → 8\np = 0.02")):
+for a, b, label in ((p0, p1, "eventify-dvs\nchanges \u2192 events"),
+                    (p1, p2, "16,384 pixels\n\u2192 8 neurons")):
     xm = (a.x1 + b.x0) / 2
     fig.text(xm, 0.46, "→", fontsize=17, ha="center", va="center")
     fig.text(xm, 0.54, label, fontsize=7, ha="center", va="bottom")
