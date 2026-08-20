@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "brian2>=2.10.1",
-    "eventify-dvs>=0.1.2",
+    "eventify-dvs>=0.2.0",
     "matplotlib>=3.11.1",
     "numpy>=2.5.2",
 ]

@@ -12,6 +12,5 @@ wheels/
 # Notebook cruft
 .ipynb_checkpoints/
 
-# Reader-supplied inputs / generated outputs
-wave.mp4
-raster_and_alarm.png
+# Scratch test clips (the bundled sample clip wave.mp4 IS tracked)
+clips/

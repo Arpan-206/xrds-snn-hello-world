@@ -1,0 +1,134 @@
+"""Regenerate the column's figures and headline numbers from the sample clip.
+
+Runs the exact pipeline from the column on wave.mp4 with a fixed RNG seed,
+so every run (and every reader) gets the same figures and the same numbers.
+
+    uv run python make_figures.py
+"""
+
+import json
+
+import cv2
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from brian2 import (
+    NeuronGroup,
+    SpikeGeneratorGroup,
+    SpikeMonitor,
+    Synapses,
+    mV,
+    ms,
+    run,
+    second,
+    seed,
+    us,
+)
+from eventify import video_to_event_stream
+
+SENSOR, C_THRESH, BIN_S = (128, 128), 0.15, 0.1
+CLIP = "wave.mp4"
+
+# --- Step 1: clip -> events -------------------------------------------------
+events = np.concatenate(
+    list(video_to_event_stream(CLIP, c_thresh=C_THRESH, sensor_size=SENSOR))
+)
+t_end = events["t"].max() / 1e6
+
+# --- Step 2: events -> SNN (identical to the column's Listing 2) ------------
+seed(11)  # fixed connectivity: same figure for every reader
+
+idx = events["y"].astype(int) * 128 + events["x"].astype(int)
+pixels = SpikeGeneratorGroup(128 * 128, idx, events["t"] * us)
+
+eqs = "dv/dt = (v_rest - v) / tau_m : volt"
+integrator = NeuronGroup(
+    N=8, model=eqs,
+    threshold="v > v_th", reset="v = v_rest", method="exact",
+    namespace={"v_rest": -70 * mV, "v_th": -58 * mV, "tau_m": 10 * ms},
+)
+integrator.v = -70 * mV
+S = Synapses(pixels, integrator, on_pre="v_post += 0.5*mV")
+S.connect(p=0.02)
+
+# --- Step 3: run -------------------------------------------------------------
+M = SpikeMonitor(integrator)
+run(events["t"].max() * us)
+
+# --- Stats -------------------------------------------------------------------
+bins = np.arange(0, t_end + BIN_S, BIN_S)
+event_hist, _ = np.histogram(events["t"] / 1e6, bins=bins)
+int_hist, _ = np.histogram(np.asarray(M.t / second), bins=bins)
+centers = 0.5 * (bins[:-1] + bins[1:])
+r = np.corrcoef(event_hist, int_hist)[0, 1]
+
+stats = {
+    "clip": CLIP,
+    "clip_seconds": round(t_end, 2),
+    "events": int(len(events)),
+    "integrator_spikes": int(M.num_spikes),
+    "compression": round(len(events) / max(M.num_spikes, 1)),
+    "pearson_r": round(float(r), 2),
+}
+print(json.dumps(stats, indent=2))
+
+# --- Figure 2: sensor rate vs integrator rate --------------------------------
+fig, axes = plt.subplots(2, 1, figsize=(9, 4), sharex=True)
+axes[0].bar(centers, event_hist, width=BIN_S, color="0.3", align="center")
+axes[0].set_ylabel("events / 100 ms")
+axes[0].set_title("What the sensor sees")
+axes[1].bar(centers, int_hist, width=BIN_S, color="C0", align="center")
+axes[1].set_ylabel("integrator spikes / 100 ms")
+axes[1].set_xlabel("time (s)")
+axes[1].set_title("What the SNN emits")
+fig.suptitle(f"Sensor rate vs. integrator rate  —  r = {r:.2f}", y=1.02)
+plt.tight_layout()
+for ext in ("png", "pdf"):
+    plt.savefig(f"sensor_vs_integrator.{ext}", dpi=160, bbox_inches="tight")
+plt.close(fig)
+
+# --- Figure 1: pipeline architecture, drawn from the same run ----------------
+cap = cv2.VideoCapture(CLIP)
+cap.set(cv2.CAP_PROP_POS_FRAMES, 60)
+frame = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2GRAY)
+cap.release()
+
+# Events from one 33 ms window around the same frame.
+t_lo, t_hi = 60 / 30 * 1e6, 61 / 30 * 1e6
+win = events[(events["t"] >= t_lo) & (events["t"] < t_hi)]
+
+fig, axes = plt.subplots(1, 3, figsize=(9.5, 3.2))
+fig.subplots_adjust(left=0.045, right=0.99, top=0.80, bottom=0.14,
+                    wspace=0.45)
+axes[0].imshow(frame, cmap="gray")
+axes[0].set_title("camera frame\n(dense, 30 fps)")
+on, off = win[win["p"] == 1], win[win["p"] == 0]
+axes[1].scatter(on["x"], on["y"], s=1, c="C0", label="ON")
+axes[1].scatter(off["x"], off["y"], s=1, c="0.6", label="OFF")
+axes[1].set_xlim(0, 128)
+axes[1].set_ylim(128, 0)
+axes[1].set_aspect("equal")
+axes[1].legend(loc="lower right", fontsize=7, markerscale=4)
+axes[1].set_title("events, one 33 ms window\n(sparse: only what changed)")
+axes[2].scatter(np.asarray(M.t / second), np.asarray(M.i), s=30, c="C0",
+                marker="|", linewidths=1.2)
+axes[2].set_ylim(-0.5, 7.5)
+axes[2].set_yticks(range(8))
+axes[2].set_xlabel("time (s)")
+axes[2].set_title("integrator spikes\n(8 LIF neurons)")
+for ax in axes[:2]:
+    ax.set_xticks([])
+    ax.set_yticks([])
+p0, p1, p2 = (ax.get_position() for ax in axes)
+for a, b, label in ((p0, p1, "eventify-dvs\nlog-ΔI > θ"),
+                    (p1, p2, "16,384 → 8\np = 0.02")):
+    xm = (a.x1 + b.x0) / 2
+    fig.text(xm, 0.46, "→", fontsize=17, ha="center", va="center")
+    fig.text(xm, 0.54, label, fontsize=7, ha="center", va="bottom")
+for ext in ("png", "pdf"):
+    plt.savefig(f"architecture.{ext}", dpi=160, bbox_inches="tight")
+plt.close(fig)
+
+print("wrote sensor_vs_integrator.{png,pdf} and architecture.{png,pdf}")

@@ -590,7 +590,7 @@ wheels = [
 
 [[package]]
 name = "eventify-dvs"
-version = "0.1.2"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "h5py" },
@@ -598,9 +598,9 @@ dependencies = [
     { name = "opencv-python" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/56/dd318fed8ba16019c808c99f8f3def1a8ad719ca774d444bb00aecc3fe1d/eventify_dvs-0.1.2.tar.gz", hash = "sha256:962b0b633f510d5fef7d817b598f6a1172627927add1ff63ab492b0dba5e68e9", size = 51458, upload-time = "2026-07-10T22:43:39.633Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/1f/0ee818d50a02e70852d123886f310ee2d508ce73166152cb4efc406b69f7/eventify_dvs-0.2.0.tar.gz", hash = "sha256:d2b558f3ae0f7b467ed3b97fdb63e670435e264bd262bc4e4e8c8fd5d6b79acb", size = 68853, upload-time = "2026-08-20T07:54:54.415Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/a5/bbf6c6619f1f02ffd56d95265b14755b44bda4c08c783f4583c7ec04a2ca/eventify_dvs-0.1.2-py3-none-any.whl", hash = "sha256:85899de07e324c1dfbaf53aaab5a4324030b7c5317ef54a1b67092d52853444d", size = 11764, upload-time = "2026-07-10T22:43:38.65Z" },
+    { url = "https://files.pythonhosted.org/packages/d5/9c/366f0240b0de42612f78379561fa6041eb58ad541a393904871db06ac824/eventify_dvs-0.2.0-py3-none-any.whl", hash = "sha256:8df5d71d48f70e7c5e7bae4bf5b77cc84a6e2d0866ee6160cdc89664ad45295b", size = 12788, upload-time = "2026-08-20T07:54:53.247Z" },
 ]
 
 [[package]]
@@ -2347,7 +2347,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "brian2", specifier = ">=2.10.1" },
-    { name = "eventify-dvs", specifier = ">=0.1.2" },
+    { name = "eventify-dvs", specifier = ">=0.2.0" },
     { name = "matplotlib", specifier = ">=3.11.1" },
     { name = "numpy", specifier = ">=2.5.2" },
 ]
