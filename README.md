@@ -58,3 +58,10 @@ the SNN consumes the same tuples either way.
 
 Draft of the column itself lives at
 [`Arpan-206/XRDS-SNN-WriteUp`](https://github.com/Arpan-206/XRDS-SNN-WriteUp).
+
+## License
+
+The code (notebook and `make_figures.py`) is released under the
+[MIT License](LICENSE). The sample clip `wave.mp4` is
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+(attribution above).
