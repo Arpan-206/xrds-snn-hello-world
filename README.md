@@ -54,11 +54,6 @@ simulators. Anything that yields `(x, y, t, p)` events can replace it:
 `dv-processing` / `metavision-sdk`. Only Step 1 of the notebook changes;
 the SNN consumes the same tuples either way.
 
-## Column
-
-Draft of the column itself lives at
-[`Arpan-206/XRDS-SNN-WriteUp`](https://github.com/Arpan-206/XRDS-SNN-WriteUp).
-
 ## License
 
 The code (notebook and `make_figures.py`) is released under the
